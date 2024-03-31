@@ -33,5 +33,5 @@ func (c *Client) GetInverterData(ctx context.Context) (*InverterData, error) {
 		return nil, fmt.Errorf("failed to unmarshal point: %s", err)
 	}
 
-	return nil, nil
+	return &point, nil
 }

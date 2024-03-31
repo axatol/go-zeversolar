@@ -26,22 +26,22 @@ Error
 
 `)
 
-func TestUnmarshalInverterData(t *testing.T) {
-	expected := zeversolar.InverterData{
-		RegistryID:       "EAB123456789",
-		RegistryKey:      "EFMH6DQ123456789",
-		HardwareVersion:  "M11",
-		SoftwareVersion:  "00B00-111R+22B22-333R",
-		Timestamp:        time.Date(2024, time.March, 1, 14, 5, 0, 0, time.UTC),
-		ZevercloudStatus: "OK",
-		SerialNumber:     "SX00050123456789",
-		PowerAC:          4853,
-		EnergyToday:      21.80,
-		Status:           "OK",
-	}
+var expectedPoint = zeversolar.InverterData{
+	RegistryID:       "EAB123456789",
+	RegistryKey:      "EFMH6DQ123456789",
+	HardwareVersion:  "M11",
+	SoftwareVersion:  "00B00-111R+22B22-333R",
+	Timestamp:        time.Date(2024, time.March, 1, 14, 5, 0, 0, time.UTC),
+	ZevercloudStatus: "OK",
+	SerialNumber:     "SX00050123456789",
+	PowerAC:          4853,
+	EnergyToday:      21.80,
+	Status:           "OK",
+}
 
+func TestUnmarshalInverterData(t *testing.T) {
 	var actual zeversolar.InverterData
 	err := actual.UnmarshalBinary(rawPoint)
 	require.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, expectedPoint, actual)
 }
