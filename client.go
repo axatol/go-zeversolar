@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 )
 
 type Client struct {
@@ -29,13 +28,8 @@ func (c *Client) GetInverterData(ctx context.Context) (*InverterData, error) {
 		return nil, fmt.Errorf("failed to read response: %s", err)
 	}
 
-	lines := strings.Split(string(raw), "\n")
-	for i, line := range lines {
-		lines[i] = strings.TrimSpace(line)
-	}
-
 	var point InverterData
-	if err := point.UnmarshalBinary([]byte(lines[0])); err != nil {
+	if err := point.UnmarshalBinary(raw); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal point: %s", err)
 	}
 
