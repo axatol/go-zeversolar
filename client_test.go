@@ -18,8 +18,13 @@ func TestClient(t *testing.T) {
 			ts := httptest.NewServer(http.HandlerFunc(mock))
 			client := zeversolar.Client{Address: ts.URL}
 			actual, err := client.GetInverterData(context.Background())
-			require.NoError(t, err)
-			require.Equal(t, tt.parsed, *actual)
+			if tt.parsed == nil {
+				require.Error(t, err)
+				require.Nil(t, actual)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tt.parsed, actual)
+			}
 		})
 	}
 }

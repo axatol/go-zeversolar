@@ -2,6 +2,7 @@ package zeversolar_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,25 +13,26 @@ import (
 
 var testcases = []struct {
 	raw    []byte
-	parsed zeversolar.InverterData
+	parsed *zeversolar.InverterData
 }{
-	{raw: []byte(`1
-1
-EAB123456789
-EFMH6DQ123456789
-M11
-00B00-111R+22B22-333R
-14:05 01/03/2024
-OK
-1
-SX00050123456789
-4853
-21.80
-OK
-Error
-
-`),
-		parsed: zeversolar.InverterData{
+	{
+		raw: []byte(strings.Join([]string{
+			"1",
+			"1",
+			"EAB123456789",
+			"EFMH6DQ123456789",
+			"M11",
+			"00B00-111R+22B22-333R",
+			"14:05 01/03/2024",
+			"OK",
+			"1",
+			"SX00050123456789",
+			"4853",
+			"21.80",
+			"OK",
+			"Error",
+		}, "\n")),
+		parsed: &zeversolar.InverterData{
 			RegistryID:       "EAB123456789",
 			RegistryKey:      "EFMH6DQ123456789",
 			HardwareVersion:  "M11",
@@ -43,15 +45,35 @@ Error
 			Status:           "OK",
 		},
 	},
+	{
+		raw: []byte(strings.Join([]string{
+			"1",
+			"0",
+			"000000000000",
+			"",
+			"",
+			"+22B22-333R",
+			"00:00 00/00/2000",
+			"OK",
+			"0",
+			"Error",
+		}, "\n")),
+		parsed: nil,
+	},
 }
 
 func TestUnmarshalInverterData(t *testing.T) {
 	for i, tt := range testcases {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			var actual zeversolar.InverterData
+			actual := new(zeversolar.InverterData)
 			err := actual.UnmarshalBinary(tt.raw)
-			require.NoError(t, err)
-			assert.Equal(t, tt.parsed, actual)
+			if tt.parsed == nil {
+				require.Error(t, err)
+				require.Nil(t, tt.parsed)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.parsed, actual)
+			}
 		})
 	}
 }
