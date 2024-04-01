@@ -7,8 +7,23 @@ import (
 	"net/http"
 )
 
+type Doer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type Client struct {
+	// address of inverter web interface
 	Address string
+	// client to use for requests
+	Client Doer
+}
+
+func (c *Client) getClient() Doer {
+	if c.Client == nil {
+		return http.DefaultClient
+	}
+
+	return c.Client
 }
 
 func (c *Client) GetInverterData(ctx context.Context) (*InverterData, error) {
@@ -17,7 +32,7 @@ func (c *Client) GetInverterData(ctx context.Context) (*InverterData, error) {
 		return nil, fmt.Errorf("failed to create request: %s", err)
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := c.getClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get response: %s", err)
 	}

@@ -1,6 +1,7 @@
 package zeversolar_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -9,7 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var rawPoint = []byte(`1
+var testcases = []struct {
+	raw    []byte
+	parsed zeversolar.InverterData
+}{
+	{raw: []byte(`1
 1
 EAB123456789
 EFMH6DQ123456789
@@ -24,24 +29,29 @@ SX00050123456789
 OK
 Error
 
-`)
-
-var expectedPoint = zeversolar.InverterData{
-	RegistryID:       "EAB123456789",
-	RegistryKey:      "EFMH6DQ123456789",
-	HardwareVersion:  "M11",
-	SoftwareVersion:  "00B00-111R+22B22-333R",
-	Timestamp:        time.Date(2024, time.March, 1, 14, 5, 0, 0, time.UTC),
-	ZevercloudStatus: "OK",
-	SerialNumber:     "SX00050123456789",
-	PowerAC:          4853,
-	EnergyToday:      21.80,
-	Status:           "OK",
+`),
+		parsed: zeversolar.InverterData{
+			RegistryID:       "EAB123456789",
+			RegistryKey:      "EFMH6DQ123456789",
+			HardwareVersion:  "M11",
+			SoftwareVersion:  "00B00-111R+22B22-333R",
+			Timestamp:        time.Date(2024, time.March, 1, 14, 5, 0, 0, time.UTC),
+			ZevercloudStatus: "OK",
+			SerialNumber:     "SX00050123456789",
+			PowerAC:          4853,
+			EnergyToday:      21.80,
+			Status:           "OK",
+		},
+	},
 }
 
 func TestUnmarshalInverterData(t *testing.T) {
-	var actual zeversolar.InverterData
-	err := actual.UnmarshalBinary(rawPoint)
-	require.NoError(t, err)
-	assert.Equal(t, expectedPoint, actual)
+	for i, tt := range testcases {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			var actual zeversolar.InverterData
+			err := actual.UnmarshalBinary(tt.raw)
+			require.NoError(t, err)
+			assert.Equal(t, tt.parsed, actual)
+		})
+	}
 }
